@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.services.AdminService;
+import ru.kata.spring.boot_security.demo.services.UserService;
 
 import java.security.Principal;
 
@@ -13,11 +13,11 @@ import java.security.Principal;
 @Controller
 public class UserController {
 
-    private final AdminService adminService;
+    private final UserService userService;
 
     @Autowired
-    public UserController(AdminService adminService) {
-        this.adminService = adminService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/hello")
@@ -27,7 +27,7 @@ public class UserController {
 
     @GetMapping("/user")
     public String showUserInfo (Principal principal, Model model) {
-        User user = adminService.findByUsername(principal.getName());
+        User user = userService.findByUsername(principal.getName());
         model.addAttribute("user",user);
         System.out.println(user);
         return "user";

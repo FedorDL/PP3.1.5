@@ -6,30 +6,30 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.services.AdminService;
+import ru.kata.spring.boot_security.demo.services.AdminServiceImpl;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final AdminService adminService;
+    private final AdminServiceImpl adminServiceImpl;
 
 
     @Autowired
-    public AdminController(AdminService adminService) {
-        this.adminService = adminService;
+    public AdminController(AdminServiceImpl adminServiceImpl) {
+        this.adminServiceImpl = adminServiceImpl;
     }
 
 
     @GetMapping("/")
     public String showAllUsers (Model model) {
-        model.addAttribute("users",adminService.showUsers());
+        model.addAttribute("users", adminServiceImpl.showUsers());
         return "all-users";
     }
 
     @GetMapping ("/delete/{id}")
     public String deleteUser (@PathVariable(value = "id") Long id) {
-        adminService.deleteUser(id);
+        adminServiceImpl.deleteUserById(id);
         return "redirect:/admin/";
     }
 
@@ -40,19 +40,19 @@ public class AdminController {
 
     @PostMapping("/saveUser")
     public String saveUser (@ModelAttribute("user") User user) {
-        adminService.saveUser(user);
+        adminServiceImpl.saveUser(user);
         return "redirect:/admin/";
     }
 
     @GetMapping("/update/{id}")
     public String updateUser (@PathVariable(value = "id") Long id, Model model) {
-        model.addAttribute("user",adminService.showUser(id));
+        model.addAttribute("user", adminServiceImpl.showUser(id));
         return "update";
     }
 
     @PostMapping("/{id}")
     public String update(@ModelAttribute("user") User user, @PathVariable(value = "id") Long id) {
-        adminService.updateUser(id,user);
+        adminServiceImpl.updateUser(id,user);
         return "redirect:/admin/";
     }
 }

@@ -17,4 +17,8 @@ public interface UserService {
     public void saveUser(User user);
 
     public void deleteUserById(Long id);
+
+    List<User> getList();
+
+    User findByEmail(String userName);
 }

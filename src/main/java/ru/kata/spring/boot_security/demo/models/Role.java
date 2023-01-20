@@ -49,4 +49,9 @@ public class Role implements GrantedAuthority {
     public String getAuthority() {
         return null;
     }
+
+    public String getNoPrefix() {
+        String pr = "ROLE_";
+        return name.substring(pr.length());
+    }
 }

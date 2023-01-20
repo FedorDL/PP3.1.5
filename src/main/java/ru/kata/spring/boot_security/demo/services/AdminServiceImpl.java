@@ -23,10 +23,6 @@ public class AdminServiceImpl implements AdminService{
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void doAdminStuff() {
-        System.out.println("Only admin here");
-    }
-
     public List<User> showUsers() {
         return userRepository.findAll();
     }
@@ -55,8 +51,11 @@ public class AdminServiceImpl implements AdminService{
         User userToBeUpdated = showUser(id);
         userToBeUpdated.setUsername(user.getUsername());
         userToBeUpdated.setLastName(user.getLastName());
+        userToBeUpdated.setEmail(user.getEmail());
         userToBeUpdated.setAge(user.getAge());
         userToBeUpdated.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(userToBeUpdated);
     }
+
+
 }

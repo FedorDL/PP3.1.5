@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.dao.UserDAOImpl;
 import ru.kata.spring.boot_security.demo.models.Role;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,16 +23,23 @@ public class UserDetailsServiceApp implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    private final UserDAOImpl userDAO;
+
+
 
     @Autowired
-    public UserDetailsServiceApp(UserRepository userRepository) {
+    public UserDetailsServiceApp(UserRepository userRepository, UserDAOImpl userDAO) {
         this.userRepository = userRepository;
+        this.userDAO = userDAO;
     }
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+//        User user = userDAO.findUserByEmail(username);
+//        System.out.println(user);
+        User user = userRepository.findByEmail(username);
+        System.out.println(user);
         if (user == null) {
             throw new UsernameNotFoundException("User not found!");
         }

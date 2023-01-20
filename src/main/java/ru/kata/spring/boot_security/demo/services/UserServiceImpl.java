@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.dao.UserDAO;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
@@ -14,11 +15,14 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
 
+    private final UserDAO userDAO;
+
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, UserDAO userDAO, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.userDAO = userDAO;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -43,6 +47,7 @@ public class UserServiceImpl implements UserService{
         User userToBeUpdated = showUser(id);
         userToBeUpdated.setUsername(user.getUsername());
         userToBeUpdated.setLastName(user.getLastName());
+        userToBeUpdated.setEmail(user.getEmail());
         userToBeUpdated.setAge(user.getAge());
         userToBeUpdated.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(userToBeUpdated);
@@ -59,5 +64,16 @@ public class UserServiceImpl implements UserService{
     @Transactional
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public List<User> getList() {
+        return userDAO.getList();
+    }
+
+    @Override
+    public User findByEmail(String userName) {
+        return userDAO.findByEmail(userName);
     }
 }

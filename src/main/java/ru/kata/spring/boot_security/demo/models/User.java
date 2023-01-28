@@ -1,111 +1,115 @@
 package ru.kata.spring.boot_security.demo.models;
 
 
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-import java.util.*;
-
+import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
-    @NotEmpty(message = "Имя не может быть пустым")
-    @Size(min = 2, max = 100, message = "Имя должно быть длиной от 2 до 100 символов")
-    @Column(name = "username")
-    private String username;
+    @NotNull
+    @Column(name = "name")
+    private String name;
 
-    @NotEmpty(message = "Email не может быть пустым")
-    @Size(min = 6, max = 100, message = "Email должен быть длиной от 2 до 100 символов")
-    @Column(name = "email_address")
-    private String email;
-
-    @NotEmpty(message = "Фамилия не может быть пустой")
-    @Size(min = 2, max = 100, message = "Фамилия должна быть длиной от 2 до 100 символов")
-    @Column(name = "lastname")
+    @NotNull
+    @Column(name = "last_name")
     private String lastName;
 
-    @Min(value = 10, message = "Вам не может быть меньше 10 лет")
+    @NotNull
     @Column(name = "age")
     private Integer age;
 
+    @NotNull
+    @Column(name = "email", unique = true)
+    private String email;
+
+    @NotNull
     @Column(name = "password")
     private String password;
 
-    @ManyToMany
+
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles",
-    joinColumns = @JoinColumn(name = "user_id"),
-    inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private List<Role> roles;
 
-
-
-    public User() {}
-
-
-    public Long getId() {
-        return id;
+    public User() {
     }
 
-    public void setId(Long id) {
+    public User(Integer id, String name, String lastName, Integer age, String email, String password, List<Role> roles) {
         this.id = id;
+        this.name = name;
+        this.lastName = lastName;
+        this.age = age;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
     }
 
-    public String getUsername() {
+    public User(String name, String lastName, Integer age, String email, String password, List<Role> roles) {
+        this.name = name;
+        this.lastName = lastName;
+        this.age = age;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    public User(String name, String lastName, Integer age, String email) {
+        this.name = name;
+        this.lastName = lastName;
+        this.age = age;
+        this.email = email;
+    }
+
+    public User(String name, String lastName, Integer age) {
+        this.name = name;
+        this.lastName = lastName;
+        this.age = age;
+    }
+
+    public String getEmail() {
         return email;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return false;
+    public Integer getId() {
+        return id;
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return false;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return false;
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return false;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getOriginalUsername() {
-        return username;
-    }
-
-    public void setOriginalUsername(String username) {
-        this.username = username;
-    }
-
-    public void setUsername(String email) {
-        this.username = email;
-    }
-
-    public String getLastName() {
+    public String getSecondName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public void setSecondName(String lastName) {
         this.lastName = lastName;
     }
 
-    public Integer getAge() {
+    public int getAge() {
         return age;
     }
 
@@ -113,58 +117,55 @@ public class User implements UserDetails {
         this.age = age;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+    public List<Role> getRoles() {
+        return roles;
     }
 
-    public String getPassword() {
-        return password;
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public void addRole(Role role) {
-        this.roles.add(role);
-    }
-
-    public User(String username, String email, String lastName, Integer age, String password, Set<Role> roles) {
-        this.username = username;
-        this.email = email;
-        this.lastName = lastName;
-        this.age = age;
-        this.password = password;
-        this.roles = roles;
-    }
-
-    public String getEmail() {
+    @Override
+    public String getUsername() {
         return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return getRoles();
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", age=" + age +
-                ", password='" + password + '\'' +
-                ", roles=" + roles +
-                '}';
-    }
 }

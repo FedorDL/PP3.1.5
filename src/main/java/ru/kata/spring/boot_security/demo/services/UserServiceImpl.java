@@ -1,79 +1,108 @@
 package ru.kata.spring.boot_security.demo.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.UserDAO;
+import ru.kata.spring.boot_security.demo.dao.RoleDao;
+import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Component
-public class UserServiceImpl implements UserService{
+@Service
+public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final UserDao userDao;
+    private final RoleDao roleDao;
 
-    private final UserDAO userDAO;
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao) {
+        this.userDao = userDao;
+        this.roleDao = roleDao;
+    }
 
-    private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserDAO userDAO, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.userDAO = userDAO;
-        this.passwordEncoder = passwordEncoder;
+    public PasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder(12);
     }
 
     @Override
-    public User showUser(Long id) {
-        return userRepository.findById(id).get();
+    @Transactional(readOnly = true)
+    public User getById(Integer id) {
+        return userDao.getById(id);
     }
 
     @Override
-    public List<User> showUsers() {
-        return userRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<User> listUsers() {
+        return userDao.listUsers();
     }
 
-    @Override
-    public User findByUsername(String name) {
-        return userRepository.findByUsername(name);
+    @Transactional
+    public boolean addRole(Role role) {
+        Role userBas = roleDao.findByName(role.getRole());
+        if (userBas != null) {
+            return false;
+        }
+        roleDao.add(role);
+        return true;
+    }
+
+    @Transactional
+    public boolean add(User user) {
+        User userBas = userDao.findByEmail(user.getUsername());
+        if (userBas != null) {
+            return false;
+        }
+        user.setPassword(bCryptPasswordEncoder().encode(user.getPassword()));
+        System.out.println(user);
+        List<String> list = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
+        List<Role> roleList = listByRole(list);
+        user.setRoles(roleList);
+        userDao.add(user);
+        return true;
     }
 
     @Override
     @Transactional
-    public void updateUser(Long id, User user) {
-        User userToBeUpdated = showUser(id);
-        userToBeUpdated.setUsername(user.getUsername());
-        userToBeUpdated.setLastName(user.getLastName());
-        userToBeUpdated.setEmail(user.getEmail());
-        userToBeUpdated.setAge(user.getAge());
-        userToBeUpdated.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(userToBeUpdated);
+    public void removeUser(Integer id) {
+        userDao.removeUser(id);
     }
 
     @Override
     @Transactional
-    public void saveUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+    public void updateUser(User user) {
+        User userBase = getById(user.getId());
+        if (!userBase.getPassword().equals(user.getPassword())) {
+            user.setPassword(bCryptPasswordEncoder().encode(user.getPassword()));
+        }
+        List<String> list = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
+        List<Role> roleList = listByRole(list);
+        user.setRoles(roleList);
+        userDao.updateUser(user);
     }
 
-    @Override
-    @Transactional
-    public void deleteUserById(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public List<User> getList() {
-        return userDAO.getList();
-    }
-
-    @Override
     public User findByEmail(String userName) {
-        return userDAO.findByEmail(userName);
+        return userDao.findByEmail(userName);
+    }
+
+    public List<Role> listByRole(List<String> name) {
+        return roleDao.listByName(name);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userDao.findByEmail(email);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User is nobody");
+        }
+        return user;
     }
 }
+
+
+

@@ -1,9 +1,10 @@
 package ru.kata.spring.boot_security.demo.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.dao.RoleDao;
@@ -20,13 +21,14 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final RoleDao roleDao;
 
-    public UserServiceImpl(UserDao userDao, RoleDao roleDao) {
+
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao, @Lazy BCryptPasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.roleDao = roleDao;
-    }
-
-    public PasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder(12);
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -57,7 +59,7 @@ public class UserServiceImpl implements UserService {
         if (userBas != null) {
             return false;
         }
-        user.setPassword(bCryptPasswordEncoder().encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         System.out.println(user);
         List<String> list = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
         List<Role> roleList = listByRole(list);
@@ -77,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         User userBase = getById(user.getId());
         if (!userBase.getPassword().equals(user.getPassword())) {
-            user.setPassword(bCryptPasswordEncoder().encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         List<String> list = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
         List<Role> roleList = listByRole(list);

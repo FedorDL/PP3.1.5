@@ -4,7 +4,7 @@ $(async function() {
 const table = $('#tbodyAllUserTable');
 async function allUsers() {
     table.empty()
-    fetch(`http://localhost:8080/api/admin`)
+    fetch(`http://localhost:8080/api/v1/admin/user/`)
         .then(response => response.json())
         .then(dataAboutUser => {
             $(`#emailH4`).append(dataAboutUser.email);

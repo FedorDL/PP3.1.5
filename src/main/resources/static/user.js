@@ -3,7 +3,7 @@ $(async function () {
 });
 
 async function userU() {
-    fetch(`http://localhost:8080/api/user`)
+    fetch(`http://localhost:8080/api/v1/user/`)
         .then(response => response.json())
         .then(dataAboutUser => {
             $(`#emailH4`).append(dataAboutUser.email);

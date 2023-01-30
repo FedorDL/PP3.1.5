@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.RoleDao;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
@@ -19,15 +18,15 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
-    private final RoleDao roleDao;
+    private final RoleService roleService;
 
 
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, RoleDao roleDao, @Lazy BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserDao userDao, RoleService roleService, @Lazy BCryptPasswordEncoder passwordEncoder) {
         this.userDao = userDao;
-        this.roleDao = roleDao;
+        this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -43,15 +42,6 @@ public class UserServiceImpl implements UserService {
         return userDao.listUsers();
     }
 
-    @Transactional
-    public boolean addRole(Role role) {
-        Role userBas = roleDao.findByName(role.getRole());
-        if (userBas != null) {
-            return false;
-        }
-        roleDao.add(role);
-        return true;
-    }
 
     @Transactional
     public boolean add(User user) {
@@ -62,7 +52,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         System.out.println(user);
         List<String> list = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-        List<Role> roleList = listByRole(list);
+        List<Role> roleList = roleService.listByRole(list);
         user.setRoles(roleList);
         userDao.add(user);
         return true;
@@ -82,7 +72,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         List<String> list = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-        List<Role> roleList = listByRole(list);
+        List<Role> roleList = roleService.listByRole(list);
         user.setRoles(roleList);
         userDao.updateUser(user);
     }
@@ -91,9 +81,6 @@ public class UserServiceImpl implements UserService {
         return userDao.findByEmail(userName);
     }
 
-    public List<Role> listByRole(List<String> name) {
-        return roleDao.listByName(name);
-    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

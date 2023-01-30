@@ -18,7 +18,7 @@ async function newUser() {
             rolesNamesArray[i] = selected_options[i].value;
         }
 
-        fetch(`http://localhost:8080/api/new`, {
+        fetch(`http://localhost:8080/api/v1/admin/user/new`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

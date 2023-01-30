@@ -12,7 +12,7 @@ function editUser() {
             rolesNamesArray[i] = selected_options[i].value;
         }
 
-        fetch(`http://localhost:8080/api/edit/` + editForm.id.value, {
+        fetch(`http://localhost:8080/api/v1/admin/user/edit/` + editForm.id.value, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'

@@ -3,6 +3,7 @@ package ru.kata.spring.boot_security.demo.userinit;
 import org.springframework.stereotype.Component;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
+import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserServiceImpl;
 
 import javax.annotation.PostConstruct;
@@ -14,8 +15,11 @@ public class Initializer {
 
     private final UserServiceImpl userService;
 
-    public Initializer(UserServiceImpl userService) {
+    private final RoleService roleService;
+
+    public Initializer(UserServiceImpl userService, RoleService roleService) {
         this.userService = userService;
+        this.roleService = roleService;
     }
 
     @PostConstruct
@@ -24,8 +28,8 @@ public class Initializer {
         Role role2 = new Role("ROLE_USER");
 
 
-        userService.addRole(role1);
-        userService.addRole(role2);
+        roleService.addRole(role1);
+        roleService.addRole(role2);
 
         List<Role> roleAdmin = new ArrayList<>();
         List<Role> roleUser = new ArrayList<>();

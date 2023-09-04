@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.kata.spring.boot_security.demo.models.Role;
 
@@ -13,8 +14,13 @@ public class RoleDaoImpl implements RoleDao {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    RoleDao roleDao;
+
     public boolean add(Role role) {
         entityManager.persist(role);
+        //Salam
+
         return true;
     }
 

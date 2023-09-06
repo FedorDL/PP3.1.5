@@ -17,6 +17,9 @@ public class RoleDaoImpl implements RoleDao {
     @Autowired
     RoleDao roleDao;
 
+    @Autowired
+    RoleDao gg;
+
     public boolean add(Role role) {
         entityManager.persist(role);
         //Salam
